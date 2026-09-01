@@ -1,0 +1,7 @@
+{
+  "name": "RB Preparaciones",
+  "description": "App oficial de RB Preparaciones: Promociones de hamburguesas caseras de pollo, pedidos a domicilio, programa de recomendaciones, oportunidad de trabajo y cotizaciones mayoristas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

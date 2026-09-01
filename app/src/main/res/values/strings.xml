@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">RB Preparaciones</string>
+    <string name="tagline_banner">¡HACÉ RENDIR CADA PESO!</string>
+    <string name="subtitle_banner">Hamburguesas Caseras de Pollo</string>
+    <string name="slogan_text">¡Abundancia que se ve, sabor que se siente! Más cantidad, mismo sabor casero que te encanta.</string>
+    <string name="location_text">SANTA FE</string>
+    <string name="delivery_tagline">¡Pedí las tuyas y llevate sabor y economía a tu casa! Hechas con amor, como en casa.</string>
+</resources>
