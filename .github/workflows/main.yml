@@ -19,6 +19,11 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    - name: Generar Keystore de depuración
+      run: |
+        keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -dname "CN=Android Debug,O=Android,C=US" -keyalg RSA -keysize 2048 -validity 10000
+        cp debug.keystore app/debug.keystore 2>/dev/null || true
+
     - name: Buscar y compilar APK
       run: |
         GRADLEW_PATH=$(find . -maxdepth 3 -name "gradlew" | head -n 1)
