@@ -18,13 +18,20 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: gradle
 
-    - name: Dar permisos de ejecución a gradlew
-      run: chmod +x gradlew
-
-    - name: Compilar APK de prueba
-      run: ./gradlew assembleDebug
+    - name: Buscar y compilar APK
+      run: |
+        GRADLEW_PATH=$(find . -maxdepth 3 -name "gradlew" | head -n 1)
+        if [ -n "$GRADLEW_PATH" ]; then
+          echo "Gradlew encontrado en: $GRADLEW_PATH"
+          chmod +x "$GRADLEW_PATH"
+          DIR=$(dirname "$GRADLEW_PATH")
+          cd "$DIR"
+          ./gradlew assembleDebug
+        else
+          echo "No se encontró gradlew, compilando con Gradle del sistema..."
+          gradle assembleDebug
+        fi
 
     - name: Subir archivo APK
       uses: actions/upload-artifact@v4
