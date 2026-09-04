@@ -409,21 +409,6 @@ fun RecommendationsScreen(
                 }
             }
         }
-
-        // Interactive simulation button for testing
-        item {
-            OutlinedButton(
-                onClick = { viewModel.simulateReferral(context) },
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("btn_simulate_referral")
-            ) {
-                Icon(imageVector = Icons.Default.PersonAdd, contentDescription = null, tint = GbPrimary)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Simular Amigo que compró (Probar Recompensa)", color = GbDarkText, fontWeight = FontWeight.Bold)
-            }
-        }
     }
 }
 

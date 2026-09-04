@@ -77,7 +77,8 @@ class RbViewModel(application: Application) : AndroidViewModel(application) {
     val wholesaleHistory: StateFlow<List<WholesaleInquiryEntity>>
     val opportunityHistory: StateFlow<List<OpportunityInquiryEntity>>
 
-    val officialWhatsAppNumber = "5493425551234" // RB Preparaciones Santa Fe Contact
+    val officialWhatsAppNumber = "5493425662877" // RB Preparaciones Santa Fe
+    val whatsAppDirectUrl = "https://wa.me/message/BZAOF6RLPQOKN1"
     val aliasTransferencia = "RB.PREPARACIONES.MP"
     val cbuTransferencia = "0000003100045678912345"
     val titularTransferencia = "RB Preparaciones - Brian Rosillo"
@@ -260,16 +261,8 @@ class RbViewModel(application: Application) : AndroidViewModel(application) {
 
     fun submitOrder(context: Context) {
         val state = _uiState.value
-        if (state.inputCustomerName.isBlank()) {
-            Toast.makeText(context, "Por favor ingresá tu nombre", Toast.LENGTH_SHORT).show()
-            return
-        }
         if (state.inputAddress.isBlank()) {
-            Toast.makeText(context, "Por favor ingresá la dirección de entrega", Toast.LENGTH_SHORT).show()
-            return
-        }
-        if (state.inputCustomerPhone.isBlank()) {
-            Toast.makeText(context, "Por favor ingresá un teléfono de contacto", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Por favor ingresá tu dirección (Calle y Altura)", Toast.LENGTH_SHORT).show()
             return
         }
         if (state.cart.isEmpty()) {
@@ -278,6 +271,40 @@ class RbViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         val (totalUnits, _, finalTotal) = calculateTotal()
+
+        val paymentMethodText = when (state.selectedPaymentMethod) {
+            PaymentMethod.EFECTIVO -> "Efectivo al Recibir"
+            PaymentMethod.TRANSFERENCIA -> "Transferencia / Mercado Pago"
+        }
+
+        val formattedTotal = "$${String.format("%,.0f", finalTotal)}"
+
+        // Estructura requerida:
+        // ¡Hola! Quisiera confirmar mi pedido:
+        // - Producto: [Total de unidades]
+        // - Total: [Total a Pagar]
+        // - Pago: [Forma de Pago]
+        // - Dirección: [Calle, Altura] - [Barrio/Zona]
+        // - Notas: [Aclaración para el repartidor]
+        val message = buildString {
+            append("¡Hola! Quisiera confirmar mi pedido:\n")
+            append("- Producto: $totalUnits hamburguesas\n")
+            if (state.appliedDiscountPercent > 0 && state.appliedCouponCode.isNotBlank()) {
+                append("- Descuento: Código ${state.appliedCouponCode} (${state.appliedDiscountPercent}% OFF)\n")
+            }
+            append("- Total: $formattedTotal\n")
+            append("- Pago: $paymentMethodText\n")
+            val address = state.inputAddress.trim()
+            val neighborhood = state.inputNeighborhood.trim()
+            val fullAddress = if (neighborhood.isNotBlank()) "$address - $neighborhood" else address
+            append("- Dirección: $fullAddress\n")
+            if (state.inputDeliveryNotes.isNotBlank()) {
+                append("- Notas: ${state.inputDeliveryNotes.trim()}")
+            }
+        }
+
+        // Redirigir inmediatamente a WhatsApp con la URL codificada
+        openWhatsAppDirect(context, message)
 
         val itemsSummaryList = state.cart.mapNotNull { (packId, qty) ->
             val pack = state.promoPacks.find { it.id == packId }
@@ -290,7 +317,7 @@ class RbViewModel(application: Application) : AndroidViewModel(application) {
                 repository.saveCustomerProfile(
                     CustomerProfileEntity(
                         id = 1,
-                        fullName = state.inputCustomerName.trim(),
+                        fullName = state.inputCustomerName.trim().ifBlank { "Cliente" },
                         phoneNumber = state.inputCustomerPhone.trim(),
                         address = state.inputAddress.trim(),
                         neighborhood = state.inputNeighborhood.trim(),
@@ -304,12 +331,12 @@ class RbViewModel(application: Application) : AndroidViewModel(application) {
                 itemsSummary = itemsSummary,
                 totalUnits = totalUnits,
                 totalPrice = finalTotal,
-                customerName = state.inputCustomerName.trim(),
+                customerName = state.inputCustomerName.trim().ifBlank { "Cliente" },
                 customerPhone = state.inputCustomerPhone.trim(),
                 deliveryAddress = state.inputAddress.trim(),
                 neighborhood = state.inputNeighborhood.trim(),
                 deliveryNotes = state.inputDeliveryNotes.trim(),
-                paymentMethod = state.selectedPaymentMethod.title
+                paymentMethod = paymentMethodText
             )
 
             val orderId = repository.createOrder(newOrder)
@@ -401,23 +428,22 @@ class RbViewModel(application: Application) : AndroidViewModel(application) {
 
     // WhatsApp Intents
     fun sendOrderToWhatsApp(context: Context, order: OrderEntity) {
-        val text = buildString {
-            append("🍔 *¡HOLA RB PREPARACIONES! QUIERO CONFIRMAR MI PEDIDO*\n\n")
-            append("📋 *Pedido #${order.id}:* ${order.itemsSummary}\n")
-            append("📦 *Total unidades:* ${order.totalUnits} hamburguesas\n")
-            append("💰 *Total a pagar:* $${String.format("%,.0f", order.totalPrice)}\n")
-            append("💳 *Forma de Pago:* ${order.paymentMethod}\n\n")
-            append("📍 *Datos de Entrega:*\n")
-            append("• Nombre: ${order.customerName}\n")
-            append("• Teléfono: ${order.customerPhone}\n")
-            append("• Dirección: ${order.deliveryAddress} (${order.neighborhood})\n")
-            if (order.deliveryNotes.isNotBlank()) {
-                append("• Aclaración: ${order.deliveryNotes}\n")
+        val message = buildString {
+            append("¡Hola! Quisiera confirmar mi pedido:\n")
+            append("- Producto: ${order.totalUnits} hamburguesas\n")
+            append("- Total: $${String.format("%,.0f", order.totalPrice)}\n")
+            append("- Pago: ${order.paymentMethod}\n")
+            val fullAddress = if (order.neighborhood.isNotBlank()) {
+                "${order.deliveryAddress} - ${order.neighborhood}"
+            } else {
+                order.deliveryAddress
             }
-            append("\n_Enviado desde la App Oficial de RB Preparaciones_")
+            append("- Dirección: $fullAddress\n")
+            if (order.deliveryNotes.isNotBlank()) {
+                append("- Notas: ${order.deliveryNotes}")
+            }
         }
-
-        openWhatsApp(context, officialWhatsAppNumber, text)
+        openWhatsAppDirect(context, message)
     }
 
     fun shareReferralWhatsApp(context: Context) {
@@ -467,6 +493,20 @@ class RbViewModel(application: Application) : AndroidViewModel(application) {
             append("\n_Solicito lista de precios mayoristas y condiciones comerciales._")
         }
         openWhatsApp(context, officialWhatsAppNumber, text)
+    }
+
+    fun openWhatsAppDirect(context: Context, message: String) {
+        try {
+            val encodedMessage = URLEncoder.encode(message, StandardCharsets.UTF_8.toString())
+            val url = "$whatsAppDirectUrl?text=$encodedMessage"
+            val uri = Uri.parse(url)
+            val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(context, "Error al abrir WhatsApp", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun openWhatsApp(context: Context, phone: String, message: String) {

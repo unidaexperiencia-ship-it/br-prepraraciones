@@ -209,66 +209,6 @@ fun OpportunityScreen(
             }
         }
 
-        // Earnings Estimator Card
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(22.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                border = BorderStroke(1.5.dp, GbBorderMuted)
-            ) {
-                Column(modifier = Modifier.padding(18.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(
-                            shape = CircleShape,
-                            color = GbSuccessContainer,
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.Default.TrendingUp,
-                                    contentDescription = null,
-                                    tint = GbSuccessGreen,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            text = "Estimación de Ganancias Semanales:",
-                            fontWeight = FontWeight.Black,
-                            fontSize = 14.sp,
-                            color = GbDarkText
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(14.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("• Vendiendo 5 cajas/sem:", fontSize = 12.sp, color = GbSecondaryText, fontWeight = FontWeight.Medium)
-                        Text("$25.000+ extra", fontWeight = FontWeight.Black, fontSize = 12.sp, color = GbSuccessGreen)
-                    }
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("• Vendiendo 15 cajas/sem:", fontSize = 12.sp, color = GbSecondaryText, fontWeight = FontWeight.Medium)
-                        Text("$75.000+ extra", fontWeight = FontWeight.Black, fontSize = 12.sp, color = GbSuccessGreen)
-                    }
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("• Vendiendo 30 cajas/sem:", fontSize = 12.sp, color = GbSecondaryText, fontWeight = FontWeight.Medium)
-                        Text("$150.000+ extra", fontWeight = FontWeight.Black, fontSize = 13.sp, color = GbSuccessGreen)
-                    }
-                }
-            }
-        }
-
         // Application Form
         item {
             Card(
