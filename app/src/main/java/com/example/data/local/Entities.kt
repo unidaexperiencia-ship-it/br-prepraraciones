@@ -39,6 +39,7 @@ data class ReferralDataEntity(
     val totalReferredFriends: Int = 0,
     val earnedFreeBurgers: Int = 0,
     val unlockedDiscountPercent: Int = 0,
+    val earnedCreditRb: Double = 0.0,
     val completedRedemptions: Int = 0
 )
 

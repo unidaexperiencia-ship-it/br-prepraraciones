@@ -62,7 +62,12 @@ data class RbUiState(
     val wsEmail: String = "",
     val wsBusinessType: String = "Rotisería / Gastronómico",
     val wsEstimatedBoxes: String = "10 a 25 cajas semanales",
-    val wsComments: String = ""
+    val wsComments: String = "",
+    // Admin Mode & Rewards Metrics state
+    val isAdminMode: Boolean = false,
+    val showAdminLoginDialog: Boolean = false,
+    val adminPinInput: String = "",
+    val adminPinError: String? = null
 )
 
 class RbViewModel(application: Application) : AndroidViewModel(application) {
@@ -127,7 +132,8 @@ class RbViewModel(application: Application) : AndroidViewModel(application) {
                         myReferralCode = "RB-${(1000..9999).random()}",
                         totalReferredFriends = 2,
                         earnedFreeBurgers = 4,
-                        unlockedDiscountPercent = 10
+                        unlockedDiscountPercent = 10,
+                        earnedCreditRb = 1500.0
                     )
                     repository.saveReferralData(initialRef)
                 }
@@ -428,6 +434,116 @@ class RbViewModel(application: Application) : AndroidViewModel(application) {
                 )
             )
             _uiState.value = _uiState.value.copy(showWholesaleSuccessDialog = true)
+        }
+    }
+
+    // Admin Mode & Recompensa Acumulada Management
+    fun openAdminLoginDialog() {
+        _uiState.value = _uiState.value.copy(
+            showAdminLoginDialog = true,
+            adminPinInput = "",
+            adminPinError = null
+        )
+    }
+
+    fun closeAdminLoginDialog() {
+        _uiState.value = _uiState.value.copy(
+            showAdminLoginDialog = false,
+            adminPinInput = "",
+            adminPinError = null
+        )
+    }
+
+    fun onAdminPinChange(input: String) {
+        _uiState.value = _uiState.value.copy(
+            adminPinInput = input,
+            adminPinError = null
+        )
+    }
+
+    fun submitAdminPin(context: Context): Boolean {
+        val pin = _uiState.value.adminPinInput.trim()
+        // Default secret PIN for admin/creator: "1234" or "7777" or "admin"
+        return if (pin == "1234" || pin.equals("admin", ignoreCase = true) || pin == "7777") {
+            _uiState.value = _uiState.value.copy(
+                isAdminMode = true,
+                showAdminLoginDialog = false,
+                adminPinInput = "",
+                adminPinError = null
+            )
+            Toast.makeText(context, "Modo Administrador activado", Toast.LENGTH_SHORT).show()
+            true
+        } else {
+            _uiState.value = _uiState.value.copy(
+                adminPinError = "PIN incorrecto. Ingrese el PIN de creador."
+            )
+            false
+        }
+    }
+
+    fun exitAdminMode(context: Context) {
+        _uiState.value = _uiState.value.copy(isAdminMode = false)
+        Toast.makeText(context, "Modo Usuario (Solo Lectura) activado", Toast.LENGTH_SHORT).show()
+    }
+
+    // Modify Recompensa Acumulada metrics (Admin only)
+    fun modifyReferredFriends(delta: Int) {
+        if (!_uiState.value.isAdminMode) return
+        viewModelScope.launch {
+            val current = referralData.value ?: ReferralDataEntity(id = 1)
+            val newFriends = (current.totalReferredFriends + delta).coerceAtLeast(0)
+            val updated = current.copy(totalReferredFriends = newFriends)
+            repository.saveReferralData(updated)
+        }
+    }
+
+    fun setReferredFriends(count: Int) {
+        if (!_uiState.value.isAdminMode) return
+        viewModelScope.launch {
+            val current = referralData.value ?: ReferralDataEntity(id = 1)
+            val newFriends = count.coerceAtLeast(0)
+            val updated = current.copy(totalReferredFriends = newFriends)
+            repository.saveReferralData(updated)
+        }
+    }
+
+    fun modifyEarnedFreeBurgers(delta: Int) {
+        if (!_uiState.value.isAdminMode) return
+        viewModelScope.launch {
+            val current = referralData.value ?: ReferralDataEntity(id = 1)
+            val newBurgers = (current.earnedFreeBurgers + delta).coerceAtLeast(0)
+            val updated = current.copy(earnedFreeBurgers = newBurgers)
+            repository.saveReferralData(updated)
+        }
+    }
+
+    fun setEarnedFreeBurgers(count: Int) {
+        if (!_uiState.value.isAdminMode) return
+        viewModelScope.launch {
+            val current = referralData.value ?: ReferralDataEntity(id = 1)
+            val newBurgers = count.coerceAtLeast(0)
+            val updated = current.copy(earnedFreeBurgers = newBurgers)
+            repository.saveReferralData(updated)
+        }
+    }
+
+    fun modifyEarnedCreditRb(delta: Double) {
+        if (!_uiState.value.isAdminMode) return
+        viewModelScope.launch {
+            val current = referralData.value ?: ReferralDataEntity(id = 1)
+            val newCredit = (current.earnedCreditRb + delta).coerceAtLeast(0.0)
+            val updated = current.copy(earnedCreditRb = newCredit)
+            repository.saveReferralData(updated)
+        }
+    }
+
+    fun setEarnedCreditRb(credit: Double) {
+        if (!_uiState.value.isAdminMode) return
+        viewModelScope.launch {
+            val current = referralData.value ?: ReferralDataEntity(id = 1)
+            val newCredit = credit.coerceAtLeast(0.0)
+            val updated = current.copy(earnedCreditRb = newCredit)
+            repository.saveReferralData(updated)
         }
     }
 
