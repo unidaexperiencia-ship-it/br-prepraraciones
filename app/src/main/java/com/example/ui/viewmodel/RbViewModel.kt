@@ -268,12 +268,20 @@ class RbViewModel(application: Application) : AndroidViewModel(application) {
 
     fun submitOrder(context: Context) {
         val state = _uiState.value
-        if (state.inputAddress.isBlank()) {
-            Toast.makeText(context, "Por favor ingresá tu dirección (Calle y Altura)", Toast.LENGTH_SHORT).show()
+        if (state.cart.isEmpty() || state.cart.values.all { it <= 0 }) {
+            Toast.makeText(context, "Tu pedido está vacío. Elegí al menos un pack.", Toast.LENGTH_SHORT).show()
             return
         }
-        if (state.cart.isEmpty()) {
-            Toast.makeText(context, "Tu pedido está vacío", Toast.LENGTH_SHORT).show()
+        if (state.inputCustomerName.isBlank()) {
+            Toast.makeText(context, "Por favor ingresá tu Nombre y Apellido", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (state.inputCustomerPhone.isBlank()) {
+            Toast.makeText(context, "Por favor ingresá tu número de Teléfono / Celular", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (state.inputAddress.isBlank()) {
+            Toast.makeText(context, "Por favor ingresá tu dirección de entrega (Calle y Altura)", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -284,68 +292,35 @@ class RbViewModel(application: Application) : AndroidViewModel(application) {
             PaymentMethod.TRANSFERENCIA -> "Transferencia / Mercado Pago"
         }
 
-        val formattedTotal = formatCurrency(finalTotal)
-
-        // Detalle de productos seleccionados
-        val itemsLines = state.cart.entries.mapNotNull { (packId, qty) ->
+        // Detalle de productos seleccionados para el resumen del pedido
+        val selectedPacksList = state.cart.entries.mapNotNull { (packId, qty) ->
             val pack = state.promoPacks.find { it.id == packId }
             if (pack != null && qty > 0) {
-                "- ${qty}x ${pack.title} (${formatCurrency(pack.price)})"
+                if (qty == 1) {
+                    pack.title
+                } else {
+                    "${qty}x ${pack.title}"
+                }
             } else null
-        }.joinToString("\n")
+        }
+        val itemsSummary = if (selectedPacksList.isEmpty()) "Pack Milanesas Caseras" else selectedPacksList.joinToString(" + ")
 
+        val clientName = state.inputCustomerName.trim().ifBlank { "Cliente" }
+        val clientPhone = state.inputCustomerPhone.trim().ifBlank { "No informado" }
         val address = state.inputAddress.trim()
         val neighborhood = state.inputNeighborhood.trim().ifBlank { "Santa Fe" }
-        val notes = state.inputDeliveryNotes.trim().ifBlank { "Sin aclaraciones" }
-
-        // Mensaje estructurado para WhatsApp según requerimiento:
-        // ¡Hola! Quisiera confirmar mi pedido:
-        //
-        // 🛒 *Detalle del Pedido:*
-        // - [Cantidad]x [Nombre del Pack] ([Precio Unitario])
-        // (Si hay más de un producto, listar cada uno en una nueva línea)
-        //
-        // 💰 *Total a Pagar:* $[Suma_Total]
-        //
-        // 💳 *Forma de Pago:* [Forma de Pago seleccionada]
-        //
-        // 📍 *Datos de Entrega:*
-        // - Dirección: [Calle y Altura]
-        // - Barrio / Zona: [Barrio]
-        // - Notas/Aclaraciones: [Notas del cliente]
-        val message = buildString {
-            append("¡Hola! Quisiera confirmar mi pedido:\n\n")
-            append("🛒 *Detalle del Pedido:*\n")
-            append(itemsLines)
-            append("\n\n")
-            append("💰 *Total a Pagar:* $formattedTotal\n\n")
-            append("💳 *Forma de Pago:* $paymentMethodText\n\n")
-            append("📍 *Datos de Entrega:*\n")
-            append("- Dirección: $address\n")
-            append("- Barrio / Zona: $neighborhood\n")
-            append("- Notas/Aclaraciones: $notes")
-        }
-
-        // Redirigir inmediatamente a WhatsApp con la URL codificada:
-        // https://wa.me/message/BZAOF6RLPQOKN1?text=[MENSAJE_ENCODED]
-        openWhatsAppDirect(context, message)
-
-        val itemsSummaryList = state.cart.entries.mapNotNull { (packId, qty) ->
-            val pack = state.promoPacks.find { it.id == packId }
-            if (pack != null && qty > 0) "${qty}x ${pack.title} (${formatCurrency(pack.price)})" else null
-        }
-        val itemsSummary = itemsSummaryList.joinToString(" + ")
+        val notes = state.inputDeliveryNotes.trim()
 
         viewModelScope.launch {
             if (state.rememberAddress) {
                 repository.saveCustomerProfile(
                     CustomerProfileEntity(
                         id = 1,
-                        fullName = state.inputCustomerName.trim().ifBlank { "Cliente" },
-                        phoneNumber = state.inputCustomerPhone.trim(),
-                        address = state.inputAddress.trim(),
-                        neighborhood = state.inputNeighborhood.trim(),
-                        deliveryNotes = state.inputDeliveryNotes.trim(),
+                        fullName = clientName,
+                        phoneNumber = clientPhone,
+                        address = address,
+                        neighborhood = neighborhood,
+                        deliveryNotes = notes,
                         defaultPaymentMethod = state.selectedPaymentMethod.name
                     )
                 )
@@ -355,11 +330,11 @@ class RbViewModel(application: Application) : AndroidViewModel(application) {
                 itemsSummary = itemsSummary,
                 totalUnits = totalUnits,
                 totalPrice = finalTotal,
-                customerName = state.inputCustomerName.trim().ifBlank { "Cliente" },
-                customerPhone = state.inputCustomerPhone.trim(),
-                deliveryAddress = state.inputAddress.trim(),
-                neighborhood = state.inputNeighborhood.trim(),
-                deliveryNotes = state.inputDeliveryNotes.trim(),
+                customerName = clientName,
+                customerPhone = clientPhone,
+                deliveryAddress = address,
+                neighborhood = neighborhood,
+                deliveryNotes = notes,
                 paymentMethod = paymentMethodText
             )
 
@@ -369,8 +344,7 @@ class RbViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.value = _uiState.value.copy(
                 isCheckoutSheetOpen = false,
                 lastPlacedOrder = savedOrder,
-                showOrderSuccessDialog = true,
-                cart = emptyMap() // Clear cart after placing
+                showOrderSuccessDialog = true
             )
         }
     }
@@ -563,21 +537,35 @@ class RbViewModel(application: Application) : AndroidViewModel(application) {
     // WhatsApp Intents
     fun sendOrderToWhatsApp(context: Context, order: OrderEntity) {
         val formattedTotal = formatCurrency(order.totalPrice)
-        val neighborhood = order.neighborhood.ifBlank { "Santa Fe" }
-        val notes = order.deliveryNotes.ifBlank { "Sin aclaraciones" }
+        val fullAddress = if (order.neighborhood.isNotBlank()) {
+            "${order.deliveryAddress}, ${order.neighborhood}"
+        } else {
+            order.deliveryAddress
+        }
 
+        // Estructura exacta requerida:
+        // 👋 *¡HOLA EQUIPO RB PREPARACIONES! QUIERO CONFIRMAR MI PEDIDO*
+        //
+        // 👤 *Nombre:* [Nombre y Apellido ingresado]
+        // 📱 *Teléfono:* [Teléfono ingresado]
+        // 📍 *Dirección:* [Dirección y Barrio ingresado]
+        // 📦 *Pedido:* [1 Kg / Media Caja / Caja Completa seleccionada]
+        // 💰 *Total a Pagar:* $[Monto Total Calculado]
+        //
+        // Por favor, confirmen el horario de entrega. ¡Muchas gracias!
         val message = buildString {
-            append("¡Hola! Quisiera confirmar mi pedido:\n\n")
-            append("🛒 *Detalle del Pedido:*\n")
-            append("- ${order.itemsSummary}\n\n")
+            append("👋 *¡HOLA EQUIPO RB PREPARACIONES! QUIERO CONFIRMAR MI PEDIDO*\n\n")
+            append("👤 *Nombre:* ${order.customerName}\n")
+            append("📱 *Teléfono:* ${order.customerPhone}\n")
+            append("📍 *Dirección:* $fullAddress\n")
+            append("📦 *Pedido:* ${order.itemsSummary}\n")
             append("💰 *Total a Pagar:* $formattedTotal\n\n")
-            append("💳 *Forma de Pago:* ${order.paymentMethod}\n\n")
-            append("📍 *Datos de Entrega:*\n")
-            append("- Dirección: ${order.deliveryAddress}\n")
-            append("- Barrio / Zona: $neighborhood\n")
-            append("- Notas/Aclaraciones: $notes")
+            append("Por favor, confirmen el horario de entrega. ¡Muchas gracias!")
         }
         openWhatsAppDirect(context, message)
+
+        // Limpiar el carrito una vez enviado a WhatsApp
+        _uiState.value = _uiState.value.copy(cart = emptyMap())
     }
 
     fun shareReferralWhatsApp(context: Context) {
