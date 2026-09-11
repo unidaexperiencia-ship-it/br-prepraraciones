@@ -94,7 +94,7 @@ fun PromoBannerCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "HAMBURGUESAS CASERAS\nDE POLLO",
+                text = "MILANESAS CASERAS\nDE POLLO",
                 color = GbDarkText,
                 fontWeight = FontWeight.Black,
                 fontSize = 22.sp,
@@ -116,7 +116,7 @@ fun PromoBannerCard(
                 Box(modifier = Modifier.fillMaxSize()) {
                     Image(
                         painter = painterResource(id = R.drawable.img_chicken_burgers_hero),
-                        contentDescription = "Hamburguesas Caseras de Pollo RB Preparaciones",
+                        contentDescription = "Milanesas Caseras de Pollo RB Preparaciones",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
                     )

@@ -595,7 +595,7 @@ fun OrderCheckoutBottomSheet(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = "Total unidades:", fontSize = 13.sp, color = GbSecondaryText)
-                Text(text = "$totalUnits hamburguesas", fontSize = 13.sp, fontWeight = FontWeight.Black, color = GbDarkText)
+                Text(text = "$totalUnits milanesas", fontSize = 13.sp, fontWeight = FontWeight.Black, color = GbDarkText)
             }
 
             if (uiState.appliedDiscountPercent > 0) {

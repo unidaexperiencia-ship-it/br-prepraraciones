@@ -97,7 +97,7 @@ fun RbTopBar(
                         )
                         Spacer(modifier = Modifier.width(2.dp))
                         Text(
-                            text = "Santa Fe • Hamburguesas de Pollo",
+                            text = "Santa Fe • Milanesas de Pollo",
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium

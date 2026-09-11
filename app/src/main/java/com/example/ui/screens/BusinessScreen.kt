@@ -92,7 +92,7 @@ fun BusinessScreen(
 
     val businessTypes = listOf(
         "Rotisería / Casa de Comidas",
-        "Bar / Hamburguesería / Restaurant",
+        "Bar / Cervecería / Restaurant",
         "Almacén / Autoservicio / Supermercado",
         "Servicio de Catering / Eventos",
         "Comedor Escolar / Universitario / Empresa",
@@ -278,7 +278,7 @@ fun BusinessScreen(
                         value = uiState.wsBusinessName,
                         onValueChange = { viewModel.onWsBusinessNameChange(it) },
                         label = { Text("Nombre del Negocio o Razón Social") },
-                        placeholder = { Text("Ej: Hamburguesería El Puente", color = GbInputPlaceholder) },
+                        placeholder = { Text("Ej: Rotisería El Puente", color = GbInputPlaceholder) },
                         textStyle = businessInputTextStyle,
                         colors = businessTextFieldColors,
                         leadingIcon = { Icon(Icons.Default.Storefront, contentDescription = null, tint = GbTertiaryBlue) },

@@ -121,7 +121,7 @@ fun RecommendationsScreen(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Text(
-                        text = "¡Recomendá y Ganá\nHamburguesas Gratis!",
+                        text = "¡Recomendá y Ganá\nMilanesas Gratis!",
                         color = GbDarkText,
                         fontWeight = FontWeight.Black,
                         fontSize = 22.sp,
@@ -132,7 +132,7 @@ fun RecommendationsScreen(
                     Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
-                        text = "Si recomendás a tus amigos, familiares o vecinos, ganás descuentos directos o más hamburguesas en tu próximo pedido.",
+                        text = "Si recomendás a tus amigos, familiares o vecinos, ganás descuentos directos o más milanesas en tu próximo pedido.",
                         color = GbSecondaryText,
                         fontSize = 13.sp,
                         textAlign = TextAlign.Center
@@ -327,7 +327,7 @@ fun RecommendationsScreen(
                             color = GbPrimary
                         )
                         Text(
-                            text = "Burgers gratis",
+                            text = "Milanesas gratis",
                             fontSize = 11.sp,
                             color = GbDarkText,
                             fontWeight = FontWeight.Medium,
@@ -403,8 +403,8 @@ fun RecommendationsScreen(
                     Spacer(modifier = Modifier.height(10.dp))
                     StepRow(
                         number = "3",
-                        title = "¡Vos recibís hamburguesas o descuento!",
-                        description = "En tu próximo pedido te sumamos hamburguesas de regalo o descontamos de tu total."
+                        title = "¡Vos recibís milanesas o descuento!",
+                        description = "En tu próximo pedido te sumamos milanesas de regalo o descontamos de tu total."
                     )
                 }
             }

@@ -167,7 +167,7 @@ fun OpportunityScreen(
                     Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
-                        text = "Sumate al equipo de revendedores oficiales de RB Preparaciones y generá ingresos vendiendo hamburguesas caseras de pollo de calidad comprobada.",
+                        text = "Sumate al equipo de revendedores oficiales de RB Preparaciones y generá ingresos vendiendo milanesas caseras de pollo de calidad comprobada.",
                         color = GbSecondaryText,
                         fontSize = 13.sp,
                         textAlign = TextAlign.Center
@@ -221,7 +221,7 @@ fun OpportunityScreen(
                 BenefitItem(
                     icon = Icons.Default.TrendingUp,
                     title = "Producto de Alta Rotación",
-                    description = "Las hamburguesas de pollo son un alimento diario que se consume y repone constantemente.",
+                    description = "Las milanesas de pollo son un alimento diario que se consume y repone constantemente.",
                     containerColor = GbTertiaryContainer.copy(alpha = 0.6f),
                     iconTint = GbTertiaryBlue
                 )

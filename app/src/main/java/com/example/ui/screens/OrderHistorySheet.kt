@@ -142,7 +142,7 @@ fun OrderHistorySheet(
                             color = GbDarkText
                         )
                         Text(
-                            text = "Tus pedidos de hamburguesas caseras quedarán guardados aquí.",
+                            text = "Tus pedidos de milanesas caseras quedarán guardados aquí.",
                             fontSize = 12.sp,
                             color = GbSecondaryText
                         )

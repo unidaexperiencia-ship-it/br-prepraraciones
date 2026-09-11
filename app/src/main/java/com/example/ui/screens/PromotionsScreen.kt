@@ -291,7 +291,7 @@ fun PromotionsScreen(
                 ) {
                     Column {
                         Text(
-                            text = "$totalUnits Hamburguesas seleccionadas",
+                            text = "$totalUnits Milanesas seleccionadas",
                             color = Color(0xFFFFDBC1),
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp

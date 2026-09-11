@@ -288,7 +288,7 @@ class RbViewModel(application: Application) : AndroidViewModel(application) {
         // - Notas: [Aclaración para el repartidor]
         val message = buildString {
             append("¡Hola! Quisiera confirmar mi pedido:\n")
-            append("- Producto: $totalUnits hamburguesas\n")
+            append("- Producto: $totalUnits milanesas\n")
             if (state.appliedDiscountPercent > 0 && state.appliedCouponCode.isNotBlank()) {
                 append("- Descuento: Código ${state.appliedCouponCode} (${state.appliedDiscountPercent}% OFF)\n")
             }
@@ -308,7 +308,7 @@ class RbViewModel(application: Application) : AndroidViewModel(application) {
 
         val itemsSummaryList = state.cart.mapNotNull { (packId, qty) ->
             val pack = state.promoPacks.find { it.id == packId }
-            if (pack != null) "${qty}x ${pack.title} (${pack.units * qty} hamburguesas)" else null
+            if (pack != null) "${qty}x ${pack.title} (${pack.units * qty} milanesas)" else null
         }
         val itemsSummary = itemsSummaryList.joinToString(" + ")
 
@@ -420,7 +420,7 @@ class RbViewModel(application: Application) : AndroidViewModel(application) {
             val updated = repository.addSimulatedReferral(current)
             Toast.makeText(
                 context,
-                "¡Amigo sumado! Total: ${updated.totalReferredFriends} amigos (+${updated.earnedFreeBurgers} hamburguesas acumuladas)",
+                "¡Amigo sumado! Total: ${updated.totalReferredFriends} amigos (+${updated.earnedFreeBurgers} milanesas acumuladas)",
                 Toast.LENGTH_LONG
             ).show()
         }
@@ -430,7 +430,7 @@ class RbViewModel(application: Application) : AndroidViewModel(application) {
     fun sendOrderToWhatsApp(context: Context, order: OrderEntity) {
         val message = buildString {
             append("¡Hola! Quisiera confirmar mi pedido:\n")
-            append("- Producto: ${order.totalUnits} hamburguesas\n")
+            append("- Producto: ${order.totalUnits} milanesas\n")
             append("- Total: $${String.format("%,.0f", order.totalPrice)}\n")
             append("- Pago: ${order.paymentMethod}\n")
             val fullAddress = if (order.neighborhood.isNotBlank()) {
@@ -448,7 +448,7 @@ class RbViewModel(application: Application) : AndroidViewModel(application) {
 
     fun shareReferralWhatsApp(context: Context) {
         val code = referralData.value?.myReferralCode ?: "RB-PROMO"
-        val text = "🍔 ¡Hola! Te recomiendo las hamburguesas caseras de pollo de *RB Preparaciones* en Santa Fe. ¡Son riquísimas, rinden un montón y tienen súper precios! Usá mi código *$code* para llevarte 10% OFF o hamburguesas extra en tu primer pedido. ¡Hacé rendir cada peso!"
+        val text = "🍗 ¡Hola! Te recomiendo las milanesas caseras de pollo de *RB Preparaciones* en Santa Fe. ¡Son riquísimas, rinden un montón y tienen súper precios! Usá mi código *$code* para llevarte 10% OFF o milanesas extra en tu primer pedido. ¡Hacé rendir cada peso!"
         
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
