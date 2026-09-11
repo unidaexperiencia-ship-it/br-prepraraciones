@@ -44,8 +44,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.SheetState
@@ -63,6 +65,8 @@ import androidx.compose.ui.unit.sp
 import com.example.data.model.PaymentMethod
 import com.example.ui.theme.GbBorderMuted
 import com.example.ui.theme.GbDarkText
+import com.example.ui.theme.GbInputPlaceholder
+import com.example.ui.theme.GbInputText
 import com.example.ui.theme.GbLightBg
 import com.example.ui.theme.GbPrimary
 import com.example.ui.theme.GbPrimaryContainer
@@ -86,6 +90,28 @@ fun OrderCheckoutBottomSheet(
 ) {
     val context = LocalContext.current
     val (totalUnits, subtotal, finalTotal) = viewModel.calculateTotal()
+
+    val orderTextFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = GbInputText,
+        unfocusedTextColor = GbInputText,
+        focusedContainerColor = Color.White,
+        unfocusedContainerColor = Color.White,
+        cursorColor = GbPrimary,
+        focusedBorderColor = GbPrimary,
+        unfocusedBorderColor = GbBorderMuted,
+        focusedLabelColor = GbPrimary,
+        unfocusedLabelColor = GbSecondaryText,
+        focusedPlaceholderColor = GbInputPlaceholder,
+        unfocusedPlaceholderColor = GbInputPlaceholder,
+        focusedLeadingIconColor = GbPrimary,
+        unfocusedLeadingIconColor = GbPrimary
+    )
+
+    val orderInputTextStyle = LocalTextStyle.current.copy(
+        color = GbInputText,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 15.sp
+    )
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -234,6 +260,9 @@ fun OrderCheckoutBottomSheet(
                 value = uiState.inputCustomerName,
                 onValueChange = { viewModel.onCustomerNameChange(it) },
                 label = { Text("Nombre y Apellido") },
+                placeholder = { Text("Ej: Juan Pérez", color = GbInputPlaceholder) },
+                textStyle = orderInputTextStyle,
+                colors = orderTextFieldColors,
                 leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = GbPrimary) },
                 singleLine = true,
                 modifier = Modifier
@@ -248,6 +277,9 @@ fun OrderCheckoutBottomSheet(
                 value = uiState.inputCustomerPhone,
                 onValueChange = { viewModel.onCustomerPhoneChange(it) },
                 label = { Text("Teléfono / WhatsApp") },
+                placeholder = { Text("Ej: 342 1234567", color = GbInputPlaceholder) },
+                textStyle = orderInputTextStyle,
+                colors = orderTextFieldColors,
                 leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null, tint = GbPrimary) },
                 singleLine = true,
                 modifier = Modifier
@@ -271,6 +303,9 @@ fun OrderCheckoutBottomSheet(
                 value = uiState.inputAddress,
                 onValueChange = { viewModel.onAddressChange(it) },
                 label = { Text("Calle, Altura y Piso/Dpto") },
+                placeholder = { Text("Ej: San Martín 1500, 2B", color = GbInputPlaceholder) },
+                textStyle = orderInputTextStyle,
+                colors = orderTextFieldColors,
                 leadingIcon = { Icon(Icons.Default.Home, contentDescription = null, tint = GbPrimary) },
                 singleLine = true,
                 modifier = Modifier
@@ -286,6 +321,9 @@ fun OrderCheckoutBottomSheet(
                     value = uiState.inputNeighborhood,
                     onValueChange = { viewModel.onNeighborhoodChange(it) },
                     label = { Text("Barrio / Zona") },
+                    placeholder = { Text("Ej: Centro, Candioti, Guadalupe", color = GbInputPlaceholder) },
+                    textStyle = orderInputTextStyle,
+                    colors = orderTextFieldColors,
                     leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null, tint = GbPrimary) },
                     singleLine = true,
                     modifier = Modifier
@@ -301,8 +339,10 @@ fun OrderCheckoutBottomSheet(
                 value = uiState.inputDeliveryNotes,
                 onValueChange = { viewModel.onDeliveryNotesChange(it) },
                 label = { Text("Aclaración para el repartidor (Opcional)") },
+                placeholder = { Text("Ej: Tocar timbre 2B, portón negro", color = GbInputPlaceholder) },
+                textStyle = orderInputTextStyle,
+                colors = orderTextFieldColors,
                 leadingIcon = { Icon(Icons.Default.Notes, contentDescription = null, tint = GbPrimary) },
-                placeholder = { Text("Ej: Tocar timbre 2B, portón negro") },
                 singleLine = false,
                 maxLines = 2,
                 modifier = Modifier
@@ -524,6 +564,9 @@ fun OrderCheckoutBottomSheet(
                     value = uiState.appliedCouponCode,
                     onValueChange = { viewModel.onCouponCodeChange(it) },
                     label = { Text("Código de descuento / Amigo") },
+                    placeholder = { Text("Ej: AMIGO10", color = GbInputPlaceholder) },
+                    textStyle = orderInputTextStyle,
+                    colors = orderTextFieldColors,
                     leadingIcon = { Icon(Icons.Default.Discount, contentDescription = null, tint = GbPrimary) },
                     singleLine = true,
                     modifier = Modifier

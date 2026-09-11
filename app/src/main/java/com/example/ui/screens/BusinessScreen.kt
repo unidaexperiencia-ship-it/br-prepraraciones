@@ -39,9 +39,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -63,6 +65,8 @@ import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.ui.theme.GbBorderMuted
 import com.example.ui.theme.GbDarkText
+import com.example.ui.theme.GbInputPlaceholder
+import com.example.ui.theme.GbInputText
 import com.example.ui.theme.GbLightBg
 import com.example.ui.theme.GbPrimary
 import com.example.ui.theme.GbPrimaryContainer
@@ -101,6 +105,28 @@ fun BusinessScreen(
         "31 a 60 cajas por semana",
         "Más de 60 cajas por semana (Gran volumen)",
         "Pedido puntual para evento masivo"
+    )
+
+    val businessTextFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = GbInputText,
+        unfocusedTextColor = GbInputText,
+        focusedContainerColor = Color.White,
+        unfocusedContainerColor = Color.White,
+        cursorColor = GbTertiaryBlue,
+        focusedBorderColor = GbTertiaryBlue,
+        unfocusedBorderColor = GbBorderMuted,
+        focusedLabelColor = GbTertiaryBlue,
+        unfocusedLabelColor = GbSecondaryText,
+        focusedPlaceholderColor = GbInputPlaceholder,
+        unfocusedPlaceholderColor = GbInputPlaceholder,
+        focusedLeadingIconColor = GbTertiaryBlue,
+        unfocusedLeadingIconColor = GbTertiaryBlue
+    )
+
+    val businessInputTextStyle = LocalTextStyle.current.copy(
+        color = GbInputText,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 15.sp
     )
 
     LazyColumn(
@@ -252,6 +278,9 @@ fun BusinessScreen(
                         value = uiState.wsBusinessName,
                         onValueChange = { viewModel.onWsBusinessNameChange(it) },
                         label = { Text("Nombre del Negocio o Razón Social") },
+                        placeholder = { Text("Ej: Hamburguesería El Puente", color = GbInputPlaceholder) },
+                        textStyle = businessInputTextStyle,
+                        colors = businessTextFieldColors,
                         leadingIcon = { Icon(Icons.Default.Storefront, contentDescription = null, tint = GbTertiaryBlue) },
                         singleLine = true,
                         modifier = Modifier
@@ -266,6 +295,9 @@ fun BusinessScreen(
                         value = uiState.wsContactName,
                         onValueChange = { viewModel.onWsContactNameChange(it) },
                         label = { Text("Persona de Contacto") },
+                        placeholder = { Text("Ej: Carlos Rodríguez", color = GbInputPlaceholder) },
+                        textStyle = businessInputTextStyle,
+                        colors = businessTextFieldColors,
                         leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = GbTertiaryBlue) },
                         singleLine = true,
                         modifier = Modifier
@@ -280,6 +312,9 @@ fun BusinessScreen(
                         value = uiState.wsPhone,
                         onValueChange = { viewModel.onWsPhoneChange(it) },
                         label = { Text("Teléfono de Contacto / WhatsApp") },
+                        placeholder = { Text("Ej: 342 1234567", color = GbInputPlaceholder) },
+                        textStyle = businessInputTextStyle,
+                        colors = businessTextFieldColors,
                         leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null, tint = GbTertiaryBlue) },
                         singleLine = true,
                         modifier = Modifier
@@ -294,6 +329,9 @@ fun BusinessScreen(
                         value = uiState.wsEmail,
                         onValueChange = { viewModel.onWsEmailChange(it) },
                         label = { Text("Correo Electrónico (Opcional)") },
+                        placeholder = { Text("Ej: contacto@negocio.com", color = GbInputPlaceholder) },
+                        textStyle = businessInputTextStyle,
+                        colors = businessTextFieldColors,
                         leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = GbTertiaryBlue) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
@@ -312,6 +350,8 @@ fun BusinessScreen(
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("Rubro o Tipo de Comercio") },
+                            textStyle = businessInputTextStyle,
+                            colors = businessTextFieldColors,
                             leadingIcon = { Icon(Icons.Default.Category, contentDescription = null, tint = GbTertiaryBlue) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isBusinessTypeDropdownExpanded) },
                             modifier = Modifier
@@ -347,6 +387,8 @@ fun BusinessScreen(
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("Volumen estimado semanal") },
+                            textStyle = businessInputTextStyle,
+                            colors = businessTextFieldColors,
                             leadingIcon = { Icon(Icons.Default.Inventory2, contentDescription = null, tint = GbTertiaryBlue) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isVolumeDropdownExpanded) },
                             modifier = Modifier
@@ -376,6 +418,9 @@ fun BusinessScreen(
                         value = uiState.wsComments,
                         onValueChange = { viewModel.onWsCommentsChange(it) },
                         label = { Text("Consultas específicas o requisitos (Opcional)") },
+                        placeholder = { Text("Ej: Entrega los días jueves por la mañana...", color = GbInputPlaceholder) },
+                        textStyle = businessInputTextStyle,
+                        colors = businessTextFieldColors,
                         maxLines = 3,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp)

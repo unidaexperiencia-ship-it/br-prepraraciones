@@ -11,6 +11,8 @@ val GbOnPrimaryContainer = Color(0xFF381000)
 
 val GbDarkText = Color(0xFF2B1700)         // Deep Espresso Primary Text
 val GbSecondaryText = Color(0xFF6B564E)    // Warm Muted Secondary Text
+val GbInputText = Color(0xFF000000)        // Pure High Contrast Black (#000000) for user inputs
+val GbInputPlaceholder = Color(0xFFA0A0A0) // Medium Gray (#A0A0A0) for input placeholders
 val GbLightBg = Color(0xFFFDFCFB)          // Clean Minimal Canvas
 val GbSurfaceLight = Color(0xFFFFFFFF)     // Crisp Card Surface
 val GbSurfaceVariant = Color(0xFFF7EFE9)   // Geometric Card Contrast Base

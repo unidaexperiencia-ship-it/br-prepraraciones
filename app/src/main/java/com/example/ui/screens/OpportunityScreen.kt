@@ -40,9 +40,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -64,6 +66,8 @@ import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.ui.theme.GbBorderMuted
 import com.example.ui.theme.GbDarkText
+import com.example.ui.theme.GbInputPlaceholder
+import com.example.ui.theme.GbInputText
 import com.example.ui.theme.GbLightBg
 import com.example.ui.theme.GbPrimary
 import com.example.ui.theme.GbPrimaryContainer
@@ -90,6 +94,28 @@ fun OpportunityScreen(
         "Tiempo completo",
         "Fines de semana",
         "En ratos libres desde el celular"
+    )
+
+    val formTextFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = GbInputText,
+        unfocusedTextColor = GbInputText,
+        focusedContainerColor = Color.White,
+        unfocusedContainerColor = Color.White,
+        cursorColor = GbPrimary,
+        focusedBorderColor = GbPrimary,
+        unfocusedBorderColor = GbBorderMuted,
+        focusedLabelColor = GbPrimary,
+        unfocusedLabelColor = GbSecondaryText,
+        focusedPlaceholderColor = GbInputPlaceholder,
+        unfocusedPlaceholderColor = GbInputPlaceholder,
+        focusedLeadingIconColor = GbPrimary,
+        unfocusedLeadingIconColor = GbPrimary
+    )
+
+    val formInputTextStyle = LocalTextStyle.current.copy(
+        color = GbInputText,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 15.sp
     )
 
     LazyColumn(
@@ -241,6 +267,9 @@ fun OpportunityScreen(
                         value = uiState.oppName,
                         onValueChange = { viewModel.onOppNameChange(it) },
                         label = { Text("Nombre y Apellido") },
+                        placeholder = { Text("Ej: María Gómez", color = GbInputPlaceholder) },
+                        textStyle = formInputTextStyle,
+                        colors = formTextFieldColors,
                         leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = GbPrimary) },
                         singleLine = true,
                         modifier = Modifier
@@ -255,6 +284,9 @@ fun OpportunityScreen(
                         value = uiState.oppPhone,
                         onValueChange = { viewModel.onOppPhoneChange(it) },
                         label = { Text("Teléfono / WhatsApp") },
+                        placeholder = { Text("Ej: 342 1234567", color = GbInputPlaceholder) },
+                        textStyle = formInputTextStyle,
+                        colors = formTextFieldColors,
                         leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null, tint = GbPrimary) },
                         singleLine = true,
                         modifier = Modifier
@@ -269,6 +301,9 @@ fun OpportunityScreen(
                         value = uiState.oppCity,
                         onValueChange = { viewModel.onOppCityChange(it) },
                         label = { Text("Ciudad / Barrio") },
+                        placeholder = { Text("Ej: Santa Fe, Santo Tomé", color = GbInputPlaceholder) },
+                        textStyle = formInputTextStyle,
+                        colors = formTextFieldColors,
                         leadingIcon = { Icon(Icons.Default.LocationCity, contentDescription = null, tint = GbPrimary) },
                         singleLine = true,
                         modifier = Modifier
@@ -289,6 +324,8 @@ fun OpportunityScreen(
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("Disponibilidad de tiempo") },
+                            textStyle = formInputTextStyle,
+                            colors = formTextFieldColors,
                             leadingIcon = { Icon(Icons.Default.AccessTime, contentDescription = null, tint = GbPrimary) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isAvailabilityDropdownExpanded) },
                             modifier = Modifier
@@ -339,6 +376,9 @@ fun OpportunityScreen(
                         value = uiState.oppMotivation,
                         onValueChange = { viewModel.onOppMotivationChange(it) },
                         label = { Text("Experiencia o motivación (Opcional)") },
+                        placeholder = { Text("Ej: Tengo experiencia en ventas, me interesa revender en mi barrio...", color = GbInputPlaceholder) },
+                        textStyle = formInputTextStyle,
+                        colors = formTextFieldColors,
                         maxLines = 3,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp)
