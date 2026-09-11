@@ -17,6 +17,7 @@ import com.example.data.model.CartItem
 import com.example.data.model.PaymentMethod
 import com.example.data.model.PromoPack
 import com.example.data.model.defaultPromoPacks
+import com.example.data.model.formatCurrency
 import com.example.data.repository.RbRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -270,45 +271,62 @@ class RbViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
-        val (totalUnits, _, finalTotal) = calculateTotal()
+        val (totalUnits, subtotal, finalTotal) = calculateTotal()
 
         val paymentMethodText = when (state.selectedPaymentMethod) {
             PaymentMethod.EFECTIVO -> "Efectivo al Recibir"
             PaymentMethod.TRANSFERENCIA -> "Transferencia / Mercado Pago"
         }
 
-        val formattedTotal = "$${String.format("%,.0f", finalTotal)}"
+        val formattedTotal = formatCurrency(finalTotal)
 
-        // Estructura requerida:
+        // Detalle de productos seleccionados
+        val itemsLines = state.cart.entries.mapNotNull { (packId, qty) ->
+            val pack = state.promoPacks.find { it.id == packId }
+            if (pack != null && qty > 0) {
+                "- ${qty}x ${pack.title} (${formatCurrency(pack.price)})"
+            } else null
+        }.joinToString("\n")
+
+        val address = state.inputAddress.trim()
+        val neighborhood = state.inputNeighborhood.trim().ifBlank { "Santa Fe" }
+        val notes = state.inputDeliveryNotes.trim().ifBlank { "Sin aclaraciones" }
+
+        // Mensaje estructurado para WhatsApp según requerimiento:
         // ¡Hola! Quisiera confirmar mi pedido:
-        // - Producto: [Total de unidades]
-        // - Total: [Total a Pagar]
-        // - Pago: [Forma de Pago]
-        // - Dirección: [Calle, Altura] - [Barrio/Zona]
-        // - Notas: [Aclaración para el repartidor]
+        //
+        // 🛒 *Detalle del Pedido:*
+        // - [Cantidad]x [Nombre del Pack] ([Precio Unitario])
+        // (Si hay más de un producto, listar cada uno en una nueva línea)
+        //
+        // 💰 *Total a Pagar:* $[Suma_Total]
+        //
+        // 💳 *Forma de Pago:* [Forma de Pago seleccionada]
+        //
+        // 📍 *Datos de Entrega:*
+        // - Dirección: [Calle y Altura]
+        // - Barrio / Zona: [Barrio]
+        // - Notas/Aclaraciones: [Notas del cliente]
         val message = buildString {
-            append("¡Hola! Quisiera confirmar mi pedido:\n")
-            append("- Producto: $totalUnits milanesas\n")
-            if (state.appliedDiscountPercent > 0 && state.appliedCouponCode.isNotBlank()) {
-                append("- Descuento: Código ${state.appliedCouponCode} (${state.appliedDiscountPercent}% OFF)\n")
-            }
-            append("- Total: $formattedTotal\n")
-            append("- Pago: $paymentMethodText\n")
-            val address = state.inputAddress.trim()
-            val neighborhood = state.inputNeighborhood.trim()
-            val fullAddress = if (neighborhood.isNotBlank()) "$address - $neighborhood" else address
-            append("- Dirección: $fullAddress\n")
-            if (state.inputDeliveryNotes.isNotBlank()) {
-                append("- Notas: ${state.inputDeliveryNotes.trim()}")
-            }
+            append("¡Hola! Quisiera confirmar mi pedido:\n\n")
+            append("🛒 *Detalle del Pedido:*\n")
+            append(itemsLines)
+            append("\n\n")
+            append("💰 *Total a Pagar:* $formattedTotal\n\n")
+            append("💳 *Forma de Pago:* $paymentMethodText\n\n")
+            append("📍 *Datos de Entrega:*\n")
+            append("- Dirección: $address\n")
+            append("- Barrio / Zona: $neighborhood\n")
+            append("- Notas/Aclaraciones: $notes")
         }
 
-        // Redirigir inmediatamente a WhatsApp con la URL codificada
+        // Redirigir inmediatamente a WhatsApp con la URL codificada:
+        // https://wa.me/message/BZAOF6RLPQOKN1?text=[MENSAJE_ENCODED]
         openWhatsAppDirect(context, message)
 
-        val itemsSummaryList = state.cart.mapNotNull { (packId, qty) ->
+        val itemsSummaryList = state.cart.entries.mapNotNull { (packId, qty) ->
             val pack = state.promoPacks.find { it.id == packId }
-            if (pack != null) "${qty}x ${pack.title} (${pack.units * qty} milanesas)" else null
+            if (pack != null && qty > 0) "${qty}x ${pack.title} (${formatCurrency(pack.price)})" else null
         }
         val itemsSummary = itemsSummaryList.joinToString(" + ")
 
@@ -428,20 +446,20 @@ class RbViewModel(application: Application) : AndroidViewModel(application) {
 
     // WhatsApp Intents
     fun sendOrderToWhatsApp(context: Context, order: OrderEntity) {
+        val formattedTotal = formatCurrency(order.totalPrice)
+        val neighborhood = order.neighborhood.ifBlank { "Santa Fe" }
+        val notes = order.deliveryNotes.ifBlank { "Sin aclaraciones" }
+
         val message = buildString {
-            append("¡Hola! Quisiera confirmar mi pedido:\n")
-            append("- Producto: ${order.totalUnits} milanesas\n")
-            append("- Total: $${String.format("%,.0f", order.totalPrice)}\n")
-            append("- Pago: ${order.paymentMethod}\n")
-            val fullAddress = if (order.neighborhood.isNotBlank()) {
-                "${order.deliveryAddress} - ${order.neighborhood}"
-            } else {
-                order.deliveryAddress
-            }
-            append("- Dirección: $fullAddress\n")
-            if (order.deliveryNotes.isNotBlank()) {
-                append("- Notas: ${order.deliveryNotes}")
-            }
+            append("¡Hola! Quisiera confirmar mi pedido:\n\n")
+            append("🛒 *Detalle del Pedido:*\n")
+            append("- ${order.itemsSummary}\n\n")
+            append("💰 *Total a Pagar:* $formattedTotal\n\n")
+            append("💳 *Forma de Pago:* ${order.paymentMethod}\n\n")
+            append("📍 *Datos de Entrega:*\n")
+            append("- Dirección: ${order.deliveryAddress}\n")
+            append("- Barrio / Zona: $neighborhood\n")
+            append("- Notas/Aclaraciones: $notes")
         }
         openWhatsAppDirect(context, message)
     }

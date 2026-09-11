@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.PromoPack
+import com.example.data.model.formatCurrency
 import com.example.ui.theme.GbBorderMuted
 import com.example.ui.theme.GbDarkText
 import com.example.ui.theme.GbLavenderAccent
@@ -166,7 +167,7 @@ fun PackItemCard(
                 // Price
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        text = "$${String.format("%,.0f", pack.price)}",
+                        text = formatCurrency(pack.price),
                         fontWeight = FontWeight.Black,
                         fontSize = 24.sp,
                         color = GbDarkText
@@ -258,7 +259,13 @@ fun PackItemCard(
 
                 // Quick Order Button
                 Button(
-                    onClick = onQuickOrderClick,
+                    onClick = {
+                        if (quantityInCart == 0) {
+                            onQuantityChange(1)
+                        } else {
+                            onQuickOrderClick()
+                        }
+                    },
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (isSelected) GbSuccessGreen else GbPrimary

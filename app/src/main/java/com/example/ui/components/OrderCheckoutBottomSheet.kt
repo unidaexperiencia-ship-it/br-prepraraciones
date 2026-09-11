@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Discount
@@ -32,6 +33,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notes
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
@@ -41,9 +43,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -63,6 +67,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.PaymentMethod
+import com.example.data.model.formatCurrency
 import com.example.ui.theme.GbBorderMuted
 import com.example.ui.theme.GbDarkText
 import com.example.ui.theme.GbInputPlaceholder
@@ -162,6 +167,12 @@ fun OrderCheckoutBottomSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            val breakdownList = uiState.cart.entries.mapNotNull { (packId, qty) ->
+                val pack = uiState.promoPacks.find { it.id == packId }
+                if (pack != null && qty > 0) "${qty}x ${pack.title} (${formatCurrency(pack.price)})" else null
+            }
+            val breakdownText = breakdownList.joinToString(" + ")
+
             // Cart Items Summary
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -170,15 +181,47 @@ fun OrderCheckoutBottomSheet(
                 border = BorderStroke(1.dp, GbBorderMuted)
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
-                    Text(
-                        text = "Detalle del Pedido:",
-                        fontWeight = FontWeight.Black,
-                        fontSize = 13.sp,
-                        color = GbDarkText
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Detalle del Pedido:",
+                            fontWeight = FontWeight.Black,
+                            fontSize = 14.sp,
+                            color = GbDarkText
+                        )
+                        if (breakdownText.isNotBlank()) {
+                            Text(
+                                text = "$totalUnits un.",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = GbPrimary
+                            )
+                        }
+                    }
+
+                    if (breakdownText.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = GbLightBg,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = breakdownText,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = GbDarkText,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                            )
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    if (uiState.cart.isEmpty()) {
+                    if (uiState.cart.isEmpty() || uiState.cart.values.all { it == 0 }) {
                         Text(
                             text = "No has seleccionado ningún pack aún.",
                             fontSize = 12.sp,
@@ -186,27 +229,79 @@ fun OrderCheckoutBottomSheet(
                         )
                     } else {
                         uiState.cart.forEach { (packId, qty) ->
-                            val pack = uiState.promoPacks.find { it.id == packId }
-                            if (pack != null) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 3.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "${qty}x ${pack.title} (${pack.units * qty}u)",
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        color = GbDarkText
-                                    )
-                                    Text(
-                                        text = "$${String.format("%,.0f", pack.price * qty)}",
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Black,
-                                        color = GbPrimary
-                                    )
+                            if (qty > 0) {
+                                val pack = uiState.promoPacks.find { it.id == packId }
+                                if (pack != null) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = "${qty}x ${pack.title}",
+                                                fontSize = 13.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = GbDarkText
+                                            )
+                                            Text(
+                                                text = "${pack.units * qty} un. • ${formatCurrency(pack.price)} c/u",
+                                                fontSize = 11.sp,
+                                                color = GbSecondaryText
+                                            )
+                                        }
+
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            FilledTonalIconButton(
+                                                onClick = { viewModel.setCartItemQuantity(pack.id, qty - 1) },
+                                                modifier = Modifier.size(28.dp),
+                                                colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                                    containerColor = Color(0xFFF0F0F0)
+                                                )
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Remove,
+                                                    contentDescription = "Restar",
+                                                    modifier = Modifier.size(14.dp),
+                                                    tint = GbDarkText
+                                                )
+                                            }
+
+                                            Text(
+                                                text = "$qty",
+                                                fontSize = 13.sp,
+                                                fontWeight = FontWeight.Black,
+                                                modifier = Modifier.padding(horizontal = 8.dp),
+                                                color = GbDarkText
+                                            )
+
+                                            FilledTonalIconButton(
+                                                onClick = { viewModel.setCartItemQuantity(pack.id, qty + 1) },
+                                                modifier = Modifier.size(28.dp),
+                                                colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                                    containerColor = GbPrimaryContainer
+                                                )
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Add,
+                                                    contentDescription = "Sumar",
+                                                    modifier = Modifier.size(14.dp),
+                                                    tint = GbPrimary
+                                                )
+                                            }
+
+                                            Spacer(modifier = Modifier.width(10.dp))
+
+                                            Text(
+                                                text = formatCurrency(pack.price * qty),
+                                                fontSize = 13.sp,
+                                                fontWeight = FontWeight.Black,
+                                                color = GbPrimary
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -589,7 +684,33 @@ fun OrderCheckoutBottomSheet(
             HorizontalDivider(color = GbBorderMuted)
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Order Price Breakdown
+            // Order Price Breakdown & Desglose
+            if (breakdownText.isNotBlank()) {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color.White,
+                    border = BorderStroke(1.dp, GbBorderMuted),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(10.dp)) {
+                        Text(
+                            text = "Desglose de lo seleccionado:",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = GbSecondaryText
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = breakdownText,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = GbDarkText
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -605,7 +726,7 @@ fun OrderCheckoutBottomSheet(
                 ) {
                     Text(text = "Descuento (${uiState.appliedDiscountPercent}% OFF):", fontSize = 13.sp, color = GbSuccessGreen)
                     Text(
-                        text = "-$${String.format("%,.0f", subtotal * (uiState.appliedDiscountPercent / 100.0))}",
+                        text = "-${formatCurrency(subtotal * (uiState.appliedDiscountPercent / 100.0))}",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Black,
                         color = GbSuccessGreen
@@ -627,7 +748,7 @@ fun OrderCheckoutBottomSheet(
                     color = GbDarkText
                 )
                 Text(
-                    text = "$${String.format("%,.0f", finalTotal)}",
+                    text = formatCurrency(finalTotal),
                     fontWeight = FontWeight.Black,
                     fontSize = 26.sp,
                     color = GbPrimary

@@ -115,7 +115,7 @@ fun PromoBannerCard(
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     Image(
-                        painter = painterResource(id = R.drawable.img_chicken_burgers_hero),
+                        painter = painterResource(id = R.drawable.img_chicken_milanesas_hero),
                         contentDescription = "Milanesas Caseras de Pollo RB Preparaciones",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()

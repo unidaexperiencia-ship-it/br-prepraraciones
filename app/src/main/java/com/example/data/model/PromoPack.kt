@@ -1,5 +1,11 @@
 package com.example.data.model
 
+fun formatCurrency(amount: Double): String {
+    val rounded = amount.toLong()
+    val thousandsFormatted = String.format(java.util.Locale.US, "%,d", rounded).replace(',', '.')
+    return "$$thousandsFormatted"
+}
+
 data class PromoPack(
     val id: String,
     val title: String,
@@ -18,7 +24,7 @@ data class PromoPack(
 val defaultPromoPacks = listOf(
     PromoPack(
         id = "pack_1kg",
-        title = "PACK 1 KG",
+        title = "Pack 1 Kg",
         units = 12,
         price = 5000.0,
         badge = "Ideal Familias Chicas",
@@ -29,7 +35,7 @@ val defaultPromoPacks = listOf(
     ),
     PromoPack(
         id = "pack_media_caja",
-        title = "MEDIA CAJA",
+        title = "Media Caja",
         units = 30,
         price = 12250.0,
         originalPrice = 12500.0,
@@ -41,7 +47,7 @@ val defaultPromoPacks = listOf(
     ),
     PromoPack(
         id = "pack_caja_completa",
-        title = "CAJA COMPLETA",
+        title = "Caja Completa",
         units = 60,
         price = 24500.0,
         originalPrice = 25000.0,

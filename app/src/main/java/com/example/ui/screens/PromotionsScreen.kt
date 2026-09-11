@@ -40,6 +40,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.data.model.formatCurrency
 import com.example.ui.components.PackItemCard
 import com.example.ui.components.PromoBannerCard
 import com.example.ui.theme.GbBorderMuted
@@ -271,8 +272,15 @@ fun PromotionsScreen(
             }
         }
 
-        // Floating Sticky Order Summary Bar
-        if (uiState.cart.isNotEmpty()) {
+        // Floating Sticky Order Summary Bar with dynamic breakdown and Total a Pagar
+        val hasCartItems = uiState.cart.values.any { it > 0 }
+        if (hasCartItems) {
+            val breakdownList = uiState.cart.entries.mapNotNull { (packId, qty) ->
+                val pack = uiState.promoPacks.find { it.id == packId }
+                if (pack != null && qty > 0) "${qty}x ${pack.title} (${formatCurrency(pack.price)})" else null
+            }
+            val breakdownText = breakdownList.joinToString(" + ")
+
             Surface(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -280,48 +288,63 @@ fun PromotionsScreen(
                     .padding(16.dp),
                 shape = RoundedCornerShape(24.dp),
                 color = GbDarkText,
-                shadowElevation = 8.dp
+                shadowElevation = 10.dp
             ) {
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 18.dp, vertical = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .padding(horizontal = 18.dp, vertical = 14.dp)
                 ) {
-                    Column {
+                    if (breakdownText.isNotBlank()) {
                         Text(
-                            text = "$totalUnits Milanesas seleccionadas",
+                            text = breakdownText,
                             color = Color(0xFFFFDBC1),
                             fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp
+                            fontSize = 12.sp,
+                            maxLines = 2
                         )
-                        Text(
-                            text = "$${String.format("%,.0f", finalTotal)}",
-                            color = Color.White,
-                            fontWeight = FontWeight.Black,
-                            fontSize = 22.sp
-                        )
+                        Spacer(modifier = Modifier.height(6.dp))
                     }
 
-                    Button(
-                        onClick = { viewModel.openCheckoutSheet() },
-                        colors = ButtonDefaults.buttonColors(containerColor = GbPrimary),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier.testTag("btn_view_cart_checkout")
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.ShoppingCart,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "Pedir Ahora",
-                            fontWeight = FontWeight.Black,
-                            fontSize = 14.sp
-                        )
+                        Column {
+                            Text(
+                                text = "Total a Pagar:",
+                                color = Color.LightGray,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = formatCurrency(finalTotal),
+                                color = Color.White,
+                                fontWeight = FontWeight.Black,
+                                fontSize = 22.sp
+                            )
+                        }
+
+                        Button(
+                            onClick = { viewModel.openCheckoutSheet() },
+                            colors = ButtonDefaults.buttonColors(containerColor = GbPrimary),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier.testTag("btn_view_cart_checkout")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ShoppingCart,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Confirmar Pedido",
+                                fontWeight = FontWeight.Black,
+                                fontSize = 14.sp
+                            )
+                        }
                     }
                 }
             }
